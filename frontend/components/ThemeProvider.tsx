@@ -20,7 +20,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const savedTheme = localStorage.getItem('theme') as Theme | null;
     if (savedTheme) {
       setTheme(savedTheme);
-    } else {
+    } else if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
       const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       setTheme(systemPrefersDark ? 'dark' : 'light');
     }
@@ -30,6 +30,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (!mounted) return;
 
     const root = document.documentElement;
+    root.style.colorScheme = theme;
     if (theme === 'dark') {
       root.classList.add('dark');
     } else {
@@ -43,11 +44,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
   };
 
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  const value = { theme, toggleTheme };
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {
